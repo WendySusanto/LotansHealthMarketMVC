@@ -42,6 +42,23 @@ namespace LotansHealthMarketMVC.Controllers
             return Json(new { data = await (from x in _cc.Branch where x.BranchID == branch_id select x.SupervisorName).FirstAsync() });
         }
 
+        public async Task<IActionResult> GetItemDetail(String item_id)
+        {
+
+            ItemModel item = await (from x in _cc.Item where x.ItemID == item_id select x).FirstAsync();
+            return Json(new { data = item });
+        }
+
+        public async Task<IActionResult> GetItemCategory()
+        {
+            return Json(new { data = await _cc.Category.ToListAsync() });
+        }
+
+        public async Task<IActionResult> GetAllPaymentName()
+        {
+            return Json(new { data = await _cc.Payment.ToListAsync() });
+        }
+
         #endregion
     }
 }

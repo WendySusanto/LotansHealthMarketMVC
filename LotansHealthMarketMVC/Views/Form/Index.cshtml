@@ -29,7 +29,7 @@
 
     <div class="tab-content">
         <!-- <form action=""> -->
-        <div id="step-1" class="tab-pane" role="tabpanel">
+        <div id="step-1" class="tab-pane" role="tabpanel" style="min-height: 500px">
             <div class="form-group d-flex align-items-center justify-content-between">
 
                 <div class="d-flex align-items-center ">
@@ -50,34 +50,22 @@
             <div class="form-group ">
                 <label class=" control-label font-weight-bold" for="branchLoc">Branch Location</label>
                 <div class="">
-                    <select id="branchloc" name="branchloc" onchange="updateSupervisor(this)" class="form-control">
+                    <select id="branchloc" name="branchloc" onchange="updateSupervisor(this)" onfocus='this.size=3' class="form-control selectpicker" data-live-search="true">
                         @foreach (var item in Model)
                         {
                             <option value="@item.BranchID" onchange="updateSupervisor(this)">@item.BranchLocation</option>
                         }
                     </select>
-                    @*<select id="branchLoc" name="branchLoc" class="form-control" asp-items="@(new SelectList(@ViewBag.Message, "BranchID","BranchLocation"))"></select>*@
                 </div>
             </div>
 
-            @*<div class="form-group ">
-            <label class=" control-label font-weight-bold" for="cashierName">Cashier Name</label>
-            <div class="input-group mb-3">
-                <input type="text" name="cashierName" class="form-control" placeholder="Cashier's Name"
-                       value="Remigus Arjuna">
-                <div class="input-group-append">
-                    <button class="btn btn-info" type="button" id="button-addon2"><i class="fas fa-search"></i></button>
-                </div>
-            </div>
-        </div>*@
 
             <div class="form-group ">
                 <label class=" control-label font-weight-bold" for="cashierName">Cashier Name</label>
                 <div class="">
-                    <select name="cashierName" class="form-control">
+                    <select name="cashierName" class="form-control" onfocus='this.size=3' data-live-search="true">
                         @*<option value="">Select Cashier's Name</option>*@
                     </select>
-                    @*<select id="branchLoc" name="branchLoc" class="form-control" asp-items="@(new SelectList(@ViewBag.Message, "BranchID","BranchLocation"))"></select>*@
                 </div>
             </div>
 
@@ -86,9 +74,6 @@
                 <div class="input-group mb-3">
                     <input type="text" name="supervisorName" class="form-control" placeholder="Supervisor's Name"
                            value="Select" disabled>
-                    @*<div class="input-group-append">
-                    <button class="btn btn-info" type="button" id="button-addon2"><i class="fas fa-search"></i></button>
-                </div>*@
                 </div>
             </div>
 
@@ -130,29 +115,41 @@
             <div class="form-group ">
                 <label class=" control-label font-weight-bold" for="itemID">Item ID</label>
                 <div class="input-group mb-3">
-                    <input type="text" name="itemID" class="form-control">
+                    <input type="text" name="itemID" id="itemID" class="form-control">
                     <div class="input-group-append">
-                        <button class="btn btn-info" type="button" id="button-addon2"><i class="fas fa-search"></i></button>
+                        <button class="btn btn-info" type="button" id="buttonItem"><i class="fas fa-search"></i></button>
                     </div>
                 </div>
             </div>
 
+
             <div class="form-group ">
                 <label class=" control-label font-weight-bold" for="itemCat">Item Category</label>
-                <input type="text" name="itemCat" class="form-control" disabled>
+                <div class="">
+                    <select name="itemCat" class="form-control" onfocus='this.size=3' data-live-search="true">
+                        @*<option value="">Select Cashier's Name</option>*@
+                    </select>
+                </div>
             </div>
+
 
             <div class="form-group ">
                 <label class=" control-label font-weight-bold" for="itemName">Item Name</label>
-                <input type="text" name="itemName" class="form-control" disabled>
+                <div class="">
+                    <select name="itemName" class="form-control">
+                        @*<option value="">Select Cashier's Name</option>*@
+                    </select>
+                </div>
             </div>
+
+
             <div class="form-group ">
                 <label class=" control-label font-weight-bold" for="itemPrice">Item Price</label>
                 <input type="text" name="itemPrice" class="form-control" disabled>
             </div>
             <div class="form-group ">
                 <label class=" control-label font-weight-bold" for="qty">Quantity</label>
-                <input type="text" name="qty" class="form-control">
+                <input type="number" name="qty" class="form-control">
             </div>
 
             <button class="btn btn-outline-info">Add Product</button>
@@ -161,26 +158,26 @@
         <div id="step-3" class="tab-pane" role="tabpanel">
 
             <h4>Payment Details</h4>
-            <div class="d-flex">
+            <div class="d-flex align-items-center">
                 <p class="mr-5" for="">Total</p>
                 <p class="font-weight-bold">Rp. 100.000</p>
+                <input type="hidden" name="change" style="border:none; background:none; " id="price" value=100000>
             </div>
             <div class="form-group ">
                 <label class=" control-label font-weight-bold" for="payment">Payment Method</label>
                 <div class="">
-                    <select id="branchLoc" name="payment" class="form-control ">
-                        <option value=""></option>
+                    <select id="branchLoc" name="paymentName" class="form-control ">
                     </select>
                 </div>
             </div>
 
             <div class="form-group ">
                 <label class=" control-label font-weight-bold" for="paid">Amount Paid</label>
-                <input type="text" name="paid" class="form-control">
+                <input type="text" name="paid" onkeyup="change(this.value);" class="form-control">
             </div>
             <div class="form-group ">
                 <label class=" control-label font-weight-bold" for="paid">Change</label>
-                <input type="text" name="change" class="form-control" disabled>
+                <input type="text" name="change" class="form-control" id="change" disabled>
             </div>
             <button class="btn btn-info">Submit</button>
 
@@ -253,15 +250,7 @@
 
 @section Scripts {
     <script>
-
-        $('select[name="branchloc"]').val();
-
-        $(document).ready(function () {
-            $('select[name="branchloc"]').amsifySelect({
-                type: 'bootstrap',
-                searchable: true
-            }, 'refresh');
-        });
+        //$.fn.selectpicker.Constructor.BootstrapVersion = '4';
 
         $.ajax({
             url: "/Form/GetAllCashierName",
@@ -277,19 +266,10 @@
                     $('select[name="cashierName"]').append(new Option(obj.data[i].cashierName, obj.data[i].cashierID));
                 }
 
-                $('select[name="cashierName"]').amsifySelect({
-                    type: 'bootstrap',
-                    searchable: true
-                }, 'refresh');
+                $('select[name="cashierName"]').selectpicker();
 
                 }
             });
-
-        //$('select[name="cashierName"]').change(function () {
-        //    alert($(this).val());
-        //});
-
-        
 
         function updateSupervisor(element) {
             var branch_id = $(element).val();
@@ -309,6 +289,95 @@
                     $('input[name="supervisorName"]').val(obj.data);
                 }
             })
+        }
+
+        $.ajax({
+            url: "/Form/GetItemCategory",
+            method: "POST",
+            dataType: "json",
+            error: function (e) {
+                alert('Failed to retrieve category list!');
+            },
+            complete: function (data) {
+                var obj = JSON.parse(data.responseText);
+                var length = Object.keys(obj.data).length;
+                for (var i = 0; i < length; i++) {
+                    $('select[name="itemCat"]').append(new Option(obj.data[i].categoryName, obj.data[i].categoryID));
+                }
+
+                $('select[name="itemCat"]').selectpicker();
+        
+            }
+        });
+
+        $("#buttonItem").click(function () {
+            var item_id = $("#itemID").val();
+ 
+            $.ajax({
+                url: "/Form/GetItemDetail",
+                method: "POST",
+                dataType: "json",
+                data: {
+                    'item_id': item_id
+                },
+                error: function (data) {
+                    alert(data);
+                    alert('Item not found!');
+                },
+                complete: function (data) {
+                    var obj = JSON.parse(data.responseText);
+                    $('select[name="itemCat"]').val(obj.data.categoryID).change();
+                    //$('input[name="itemName"]').val("val2");
+                    //$('input[name="itemName"]').val(obj.data.itemName);
+                    //$('input[name="itemPrice"]').val(obj.data.itemPrice);
+                }
+            })
+        })
+
+        //$.ajax({
+        //    url: "/Form/GetAllItemName",
+        //    method: "POST",
+        //    dataType: "json",
+        //    error: function (e) {
+        //        alert('Failed to retrieve cashier name!');
+        //    },
+        //    complete: function (data) {
+        //        var obj = JSON.parse(data.responseText);
+        //        var length = Object.keys(obj.data).length;
+        //        for (var i = 0; i < length; i++) {
+        //            $('select[name="cashierName"]').append(new Option(obj.data[i].cashierName, obj.data[i].cashierID));
+        //        }
+
+        //        //$('select[name="cashierName"]').amsifySelect({
+        //        //    type: 'bootstrap',
+        //        //    searchable: true
+        //        //}, 'refresh');
+
+        //    }
+        //});
+
+        //step3
+        $.ajax({
+            url: "/Form/GetAllPaymentName",
+            method: "POST",
+            dataType: "json",
+            error: function (e) {
+                alert('Failed to retrieve payment name!');
+            },
+            complete: function (data) {
+                console.log(data.responseText);
+                var obj = JSON.parse(data.responseText);
+                var length = Object.keys(obj.data).length;
+                for (var i = 0; i < length; i++) {
+                    $('select[name="paymentName"]').append(new Option(obj.data[i].paymentName, obj.data[i].paymentID));
+                }
+            }
+        });
+
+        function change(value) {
+            var x;
+            x = value - document.getElementById('price').value;//price ini id dari total pricenya nanti (blom bisa sekarang)
+            document.getElementById('change').value = x;
         }
 
     </script>
