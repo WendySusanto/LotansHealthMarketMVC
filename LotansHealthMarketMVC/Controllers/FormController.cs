@@ -32,6 +32,10 @@ namespace LotansHealthMarketMVC.Controllers
         }
 
         #region API Calls
+        public async Task<IActionResult> GetAllCashierName()
+        {
+            return Json(new { data = await _cc.Cashier.ToListAsync() });
+        }
 
         public async Task<IActionResult> GetSupervisorByBranch(String branch_id)
         {

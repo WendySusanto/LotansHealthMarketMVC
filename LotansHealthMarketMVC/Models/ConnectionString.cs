@@ -14,6 +14,7 @@ namespace LotansHealthMarketMVC.Models
         }
 
         public DbSet<BranchModel> Branch { get; set; }
+        public DbSet<CashierModel> Cashier { get; set; }
 
     }
 }

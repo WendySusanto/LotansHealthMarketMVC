@@ -60,14 +60,24 @@
                 </div>
             </div>
 
+            @*<div class="form-group ">
+            <label class=" control-label font-weight-bold" for="cashierName">Cashier Name</label>
+            <div class="input-group mb-3">
+                <input type="text" name="cashierName" class="form-control" placeholder="Cashier's Name"
+                       value="Remigus Arjuna">
+                <div class="input-group-append">
+                    <button class="btn btn-info" type="button" id="button-addon2"><i class="fas fa-search"></i></button>
+                </div>
+            </div>
+        </div>*@
+
             <div class="form-group ">
                 <label class=" control-label font-weight-bold" for="cashierName">Cashier Name</label>
-                <div class="input-group mb-3">
-                    <input type="text" name="cashierName" class="form-control" placeholder="Cashier's Name"
-                           value="Remigus Arjuna">
-                    <div class="input-group-append">
-                        <button class="btn btn-info" type="button" id="button-addon2"><i class="fas fa-search"></i></button>
-                    </div>
+                <div class="">
+                    <select name="cashierName" class="form-control">
+                        @*<option value="">Select Cashier's Name</option>*@
+                    </select>
+                    @*<select id="branchLoc" name="branchLoc" class="form-control" asp-items="@(new SelectList(@ViewBag.Message, "BranchID","BranchLocation"))"></select>*@
                 </div>
             </div>
 
@@ -75,10 +85,10 @@
                 <label class=" control-label font-weight-bold" for="supervisorName">Supervisor Name</label>
                 <div class="input-group mb-3">
                     <input type="text" name="supervisorName" class="form-control" placeholder="Supervisor's Name"
-                           value="Bryan Susanto" disabled>
+                           value="Select" disabled>
                     @*<div class="input-group-append">
-                        <button class="btn btn-info" type="button" id="button-addon2"><i class="fas fa-search"></i></button>
-                    </div>*@
+                    <button class="btn btn-info" type="button" id="button-addon2"><i class="fas fa-search"></i></button>
+                </div>*@
                 </div>
             </div>
 
@@ -243,10 +253,43 @@
 
 @section Scripts {
     <script>
-        //$(document).ready(function () {
-        //    $('input[name="cashierName"]').select2();
+
+        $('select[name="branchloc"]').val();
+
+        $(document).ready(function () {
+            $('select[name="branchloc"]').amsifySelect({
+                type: 'bootstrap',
+                searchable: true
+            }, 'refresh');
+        });
+
+        $.ajax({
+            url: "/Form/GetAllCashierName",
+            method: "POST",
+            dataType: "json",
+            error: function (e) {
+                alert('Failed to retrieve cashier name!');
+            },
+            complete: function (data) {
+                var obj = JSON.parse(data.responseText);
+                var length = Object.keys(obj.data).length;
+                for (var i = 0; i < length ; i++){
+                    $('select[name="cashierName"]').append(new Option(obj.data[i].cashierName, obj.data[i].cashierID));
+                }
+
+                $('select[name="cashierName"]').amsifySelect({
+                    type: 'bootstrap',
+                    searchable: true
+                }, 'refresh');
+
+                }
+            });
+
+        //$('select[name="cashierName"]').change(function () {
+        //    alert($(this).val());
         //});
 
+        
 
         function updateSupervisor(element) {
             var branch_id = $(element).val();
@@ -267,6 +310,6 @@
                 }
             })
         }
-        
+
     </script>
 }
