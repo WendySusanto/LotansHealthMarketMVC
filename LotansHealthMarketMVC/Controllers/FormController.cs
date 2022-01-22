@@ -30,5 +30,14 @@ namespace LotansHealthMarketMVC.Controllers
 
             return View(result);
         }
+
+        #region API Calls
+
+        public async Task<IActionResult> GetSupervisorByBranch(String branch_id)
+        {
+            return Json(new { data = await (from x in _cc.Branch where x.BranchID == branch_id select x.SupervisorName).FirstAsync() });
+        }
+
+        #endregion
     }
 }

@@ -42,7 +42,7 @@
                 <div class="d-flex align-items-center ">
                     <label class="mb-0 mr-3 control-label mr-2 font-weight-bold" for="date">Date</label>
                     <div class="">
-                        <input type="date" name="date" class="form-control">
+                        <input type="date" id="transDate" name="date" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" disabled>
                     </div>
                 </div>
             </div>
@@ -50,10 +50,10 @@
             <div class="form-group ">
                 <label class=" control-label font-weight-bold" for="branchLoc">Branch Location</label>
                 <div class="">
-                    <select id="branchloc" name="branchloc" class="form-control">
+                    <select id="branchloc" name="branchloc" onchange="updateSupervisor(this)" class="form-control">
                         @foreach (var item in Model)
                         {
-                            <option value="@item.BranchID">@item.BranchLocation</option>
+                            <option value="@item.BranchID" onchange="updateSupervisor(this)">@item.BranchLocation</option>
                         }
                     </select>
                     @*<select id="branchLoc" name="branchLoc" class="form-control" asp-items="@(new SelectList(@ViewBag.Message, "BranchID","BranchLocation"))"></select>*@
@@ -64,7 +64,7 @@
                 <label class=" control-label font-weight-bold" for="cashierName">Cashier Name</label>
                 <div class="input-group mb-3">
                     <input type="text" name="cashierName" class="form-control" placeholder="Cashier's Name"
-                           value="Remigus Arjuna" disabled>
+                           value="Remigus Arjuna">
                     <div class="input-group-append">
                         <button class="btn btn-info" type="button" id="button-addon2"><i class="fas fa-search"></i></button>
                     </div>
@@ -75,10 +75,10 @@
                 <label class=" control-label font-weight-bold" for="supervisorName">Supervisor Name</label>
                 <div class="input-group mb-3">
                     <input type="text" name="supervisorName" class="form-control" placeholder="Supervisor's Name"
-                           value="Bryan Susanto">
-                    <div class="input-group-append">
+                           value="Bryan Susanto" disabled>
+                    @*<div class="input-group-append">
                         <button class="btn btn-info" type="button" id="button-addon2"><i class="fas fa-search"></i></button>
-                    </div>
+                    </div>*@
                 </div>
             </div>
 
@@ -241,3 +241,32 @@
     </div>
 </div>
 
+@section Scripts {
+    <script>
+        //$(document).ready(function () {
+        //    $('input[name="cashierName"]').select2();
+        //});
+
+
+        function updateSupervisor(element) {
+            var branch_id = $(element).val();
+
+            $.ajax({
+                url: "/Form/GetSupervisorByBranch",
+                method: "POST",
+                dataType: "json",
+                data: {
+                    'branch_id': branch_id
+                },
+                error: function (e) {
+                    alert('Supervisor not found!');
+                },
+                complete: function (data) {
+                    var obj = JSON.parse(data.responseText);
+                    $('input[name="supervisorName"]').val(obj.data);
+                }
+            })
+        }
+        
+    </script>
+}
