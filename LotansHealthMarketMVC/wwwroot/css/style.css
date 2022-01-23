@@ -5,3 +5,7 @@ hr {
 .wizard > .content > .body {
     position: relative !important;
 }
+
+.sw > .tab-content{
+    overflow: visible !important;
+}
