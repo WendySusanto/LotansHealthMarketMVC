@@ -29,7 +29,7 @@
 
     <div class="tab-content">
         <!-- <form action=""> -->
-        <div id="step-1" class="tab-pane" role="tabpanel">
+        <div id="step-1" class="tab-pane" role="tabpanel" style="min-height:500px">
             <div class="form-group d-flex align-items-center justify-content-between">
 
                 <div class="d-flex align-items-center ">
@@ -167,14 +167,15 @@
             </div>
 
             <div class="form-group ">
-                <label class=" control-label font-weight-bold" for="paid">Amount Paid</label>
+                <label class="control-label font-weight-bold" for="paid">Amount Paid</label>
                 <input type="text" name="paid" onkeyup="change(this.value);" onchange="change(this.value);" value="0" class="form-control">
+                <div class="invalid-feedback amount-paid"></div>
             </div>
             <div class="form-group ">
                 <label class=" control-label font-weight-bold" for="change">Change</label>
                 <input type="text" class="form-control" id="change" disabled>
             </div>
-            <button class="btn btn-info">Submit</button>
+            <button class="btn btn-info" onclick="addTransaction()">Submit</button>
 
         </div>
 
@@ -227,7 +228,7 @@
                 <div class="col-3">Amount Paid</div>
                 <div class="col-3"> Rp 40.000</div>
             </div>
-
+            
             <div class="row">
                 <div class="col-6">
                 </div>
@@ -459,7 +460,7 @@
                     $('tbody #noData').remove();
                 }
                 var index = $('tbody tr').length + 1;
-                var html = '<tr item-id="' + item_id + '"><td scope = "col">' + index + '</td><td>' + item_id + '</td><td>' + item_name + '</td><td><input type="number" name="itemQty" value="' + qty + '"disabled></td><td sub-total>' + getIdr(subtotal) + '</td><td><button onclick="deleteThisRow(this)" class="btn btn-danger"><i class="fas fa-trash mr-2"></i>Delete</button></td></tr>';
+                var html = '<tr item-id="' + item_id + '"><td scope = "col">' + index + '</td><td>' + item_id + '</td><td>' + item_name + '</td><td><input type="number" quantity name="itemQty" value="' + qty + '"disabled></td><td sub-total>' + getIdr(subtotal) + '</td><td><button onclick="deleteThisRow(this)" class="btn btn-danger"><i class="fas fa-trash mr-2"></i>Delete</button></td></tr>';
                 $('#tableProduct tbody').append(html);
                 updateTotalPrice(subtotal);
             }
@@ -527,6 +528,33 @@
             document.getElementById('change').value = x;
         }
 
+        function addTransaction() {
+            //validate amount of paid
+            $('.amount-paid').text('');
+            $('input[name="paid"]').removeClass('is-invalid');
+            if (document.getElementById('change').value < 0) {
+                $('.amount-paid').text('The amount of money paid is not enough');
+                $('input[name="paid"]').addClass('is-invalid');
+            }
+            else {
+                //get all needed data
+                var listProduct = [];
+                var listProductQty = [];
+                var paymentID = $('select[name="paymentName"]').val();
+                var cashierID = $('select[name="cashierName"]').val();
+
+                $('tbody tr[item-id]').each(function () {
+                    var thisRowProductId = $(this).attr('item-id');
+                    var thisRowProductQty = $(this).find('input[name="itemQty"]').val();
+                    listProduct.push(thisRowProductId);
+                    listProductQty.push(thisRowProductQty);
+                });
+                console.log(listProduct);
+                console.log(listProductQty);
+                console.log(paymentID);
+                console.log(cashierID);
+            }
+        }
 
     </script>
 }
