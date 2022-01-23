@@ -29,7 +29,7 @@
 
     <div class="tab-content">
         <!-- <form action=""> -->
-        <div id="step-1" class="tab-pane" role="tabpanel" style="min-height: 500px">
+        <div id="step-1" class="tab-pane" role="tabpanel" style="min-height:500px">
             <div class="form-group d-flex align-items-center justify-content-between">
 
                 <div class="d-flex align-items-center ">
@@ -83,7 +83,7 @@
         <div id="step-2" class="tab-pane" role="tabpanel">
             <label for="" class="font-weight-bold">Sales Summary</label>
             <div class="table-responsive">
-                <table class="table table-bordered">
+                <table id="tableProduct" class="table table-bordered">
                     <thead>
                         <tr>
                             <th scope="col">No.</th>
@@ -95,20 +95,23 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td scope="row">1</td>
-                            <td>2222</td>
-                            <td>Otto</td>
-                            <td><input type="number" name="" id="" value="1"></td>
-                            <td>Rp. 100.000</td>
-                            <td><a href="#" class="badge badge-danger"><i class="fas fa-trash"></i></a></td>
-                        </tr>
-
+                        @*<tr>
+            <td scope="row">1</td>
+            <td>2222</td>
+            <td>Otto</td>
+            <td><input type="number" name="" id="" value="1"></td>
+            <td>Rp. 100.000</td>
+            <td><a href="#" class="badge badge-danger"><i class="fas fa-trash"></i></a></td>
+        </tr>*@
+                    <tfoot>
                         <tr>
                             <th colspan="3">Total</th>
                             <td colspan="3">Rp. 100.000</td>
                         </tr>
+                    </tfoot>
+                        
                     </tbody>
+                    
                 </table>
             </div>
 
@@ -126,8 +129,8 @@
             <div class="form-group ">
                 <label class=" control-label font-weight-bold" for="itemCat">Item Category</label>
                 <div class="">
-                    <select name="itemCat" class="form-control" onfocus='this.size=3' data-live-search="true">
-                        @*<option value="">Select Cashier's Name</option>*@
+                    <select name="itemCat" class="form-control" onchange="updateItemNameListByCategory(this)" data-live-search="true">
+                        <option value="">-Filter by Category-</option>
                     </select>
                 </div>
             </div>
@@ -136,7 +139,7 @@
             <div class="form-group ">
                 <label class=" control-label font-weight-bold" for="itemName">Item Name</label>
                 <div class="">
-                    <select name="itemName" class="form-control">
+                    <select name="itemName" class="form-control" data-live-search="true">
                         @*<option value="">Select Cashier's Name</option>*@
                     </select>
                 </div>
@@ -152,7 +155,7 @@
                 <input type="number" name="qty" class="form-control">
             </div>
 
-            <button class="btn btn-outline-info">Add Product</button>
+            <button class="btn btn-outline-info" onclick="appendProduct()">Add Product</button>
         </div>
 
         <div id="step-3" class="tab-pane" role="tabpanel">
@@ -166,7 +169,7 @@
             <div class="form-group ">
                 <label class=" control-label font-weight-bold" for="payment">Payment Method</label>
                 <div class="">
-                    <select id="branchLoc" name="paymentName" class="form-control ">
+                    <select id="paymentName" name="paymentName" class="form-control ">
                     </select>
                 </div>
             </div>
@@ -250,27 +253,36 @@
 
 @section Scripts {
     <script>
+
         //$.fn.selectpicker.Constructor.BootstrapVersion = '4';
 
-        $.ajax({
-            url: "/Form/GetAllCashierName",
-            method: "POST",
-            dataType: "json",
-            error: function (e) {
-                alert('Failed to retrieve cashier name!');
-            },
-            complete: function (data) {
-                var obj = JSON.parse(data.responseText);
-                var length = Object.keys(obj.data).length;
-                for (var i = 0; i < length ; i++){
-                    $('select[name="cashierName"]').append(new Option(obj.data[i].cashierName, obj.data[i].cashierID));
-                }
+        $(document).ready(function () {
+            GetAllCashierName();
+            GetItemCategory();
+            GetAllItemName();
+        });
 
-                $('select[name="cashierName"]').selectpicker();
+        function GetAllCashierName() {
+            $.ajax({
+                url: "/Form/GetAllCashierName",
+                method: "POST",
+                dataType: "json",
+                error: function (e) {
+                    alert('Failed to retrieve cashier name!');
+                },
+                complete: function (data) {
+                    var obj = JSON.parse(data.responseText);
+                    var length = Object.keys(obj.data).length;
+                    for (var i = 0; i < length; i++) {
+                        $('select[name="cashierName"]').append(new Option(obj.data[i].cashierName, obj.data[i].cashierID));
+                    }
+
+                    $('select[name="cashierName"]').selectpicker();
 
                 }
             });
-
+        }
+        
         function updateSupervisor(element) {
             var branch_id = $(element).val();
 
@@ -291,24 +303,27 @@
             })
         }
 
-        $.ajax({
-            url: "/Form/GetItemCategory",
-            method: "POST",
-            dataType: "json",
-            error: function (e) {
-                alert('Failed to retrieve category list!');
-            },
-            complete: function (data) {
-                var obj = JSON.parse(data.responseText);
-                var length = Object.keys(obj.data).length;
-                for (var i = 0; i < length; i++) {
-                    $('select[name="itemCat"]').append(new Option(obj.data[i].categoryName, obj.data[i].categoryID));
-                }
+        function GetItemCategory() {
+            $.ajax({
+                url: "/Form/GetItemCategory",
+                method: "POST",
+                dataType: "json",
+                error: function (e) {
+                    alert('Failed to retrieve category list!');
+                },
+                complete: function (data) {
+                    var obj = JSON.parse(data.responseText);
+                    var length = Object.keys(obj.data).length;
+                    for (var i = 0; i < length; i++) {
+                        $('select[name="itemCat"]').append(new Option(obj.data[i].categoryName, obj.data[i].categoryID));
+                    }
 
-                $('select[name="itemCat"]').selectpicker();
-        
-            }
-        });
+                    $('select[name="itemCat"]').selectpicker();
+
+                }
+            });
+        }
+       
 
         $("#buttonItem").click(function () {
             var item_id = $("#itemID").val();
@@ -321,42 +336,102 @@
                     'item_id': item_id
                 },
                 error: function (data) {
-                    alert(data);
                     alert('Item not found!');
                 },
                 complete: function (data) {
                     var obj = JSON.parse(data.responseText);
                     $('select[name="itemCat"]').val(obj.data.categoryID).change();
-                    //$('input[name="itemName"]').val("val2");
-                    //$('input[name="itemName"]').val(obj.data.itemName);
+                    $('select[name="itemName"]').val(obj.data.itemID).change();
                     //$('input[name="itemPrice"]').val(obj.data.itemPrice);
                 }
             })
         })
 
-        //$.ajax({
-        //    url: "/Form/GetAllItemName",
-        //    method: "POST",
-        //    dataType: "json",
-        //    error: function (e) {
-        //        alert('Failed to retrieve cashier name!');
-        //    },
-        //    complete: function (data) {
-        //        var obj = JSON.parse(data.responseText);
-        //        var length = Object.keys(obj.data).length;
-        //        for (var i = 0; i < length; i++) {
-        //            $('select[name="cashierName"]').append(new Option(obj.data[i].cashierName, obj.data[i].cashierID));
-        //        }
+        function GetAllItemName() {
+            $.ajax({
+                url: "/Form/GetAllItemName",
+                method: "POST",
+                dataType: "json",
+                error: function (e) {
+                    alert('Failed to retrieve item name!');
+                },
+                complete: function (data) {
+                    var obj = JSON.parse(data.responseText);
+                    var length = Object.keys(obj.data).length;
+                    for (var i = 0; i < length; i++) {
+                        $('select[name="itemName"]').append(new Option(obj.data[i].itemName, obj.data[i].itemID));
+                    }
+                    $('select[name="itemName"]').val(obj.data[0].itemID).change();
+                    $('select[name="itemName"]').selectpicker();
 
-        //        //$('select[name="cashierName"]').amsifySelect({
-        //        //    type: 'bootstrap',
-        //        //    searchable: true
-        //        //}, 'refresh');
+                }
+            });
+        }
+        
+        function updateItemNameListByCategory(element) {
 
-        //    }
-        //});
+            var category_id = $(element).val();
+            //alert(category_id);
+
+            $.ajax({
+                url: "/Form/GetAllItemName",
+                method: "POST",
+                dataType: "json",
+                async: false,
+                data: {
+                    'category_id': category_id
+                },
+                error: function (e) {
+                    alert('Failed to retrieve item name!');
+                },
+                complete: function (data) {
+                    $('select[name="itemName"]').empty();
+                    var obj = JSON.parse(data.responseText);
+                    var length = Object.keys(obj.data).length;
+                    for (var i = 0; i < length; i++) {
+                        $('select[name="itemName"]').append(new Option(obj.data[i].itemName, obj.data[i].itemID));
+                    }
+                    $('select[name="itemName"]').selectpicker('refresh');
+
+                    $('select[name="itemName"]').val(obj.data[0].itemID).change();
+
+                    $('select[name="itemName"]').selectpicker('refresh');
+                    
+                }
+            });
+        }
+
+        $('select[name="itemName"]').change(function () {
+            var item_id = $('select[name="itemName"]').val();
+
+            $.ajax({
+                url: "/Form/GetItemPrice",
+                method: "POST",
+                dataType: "json",
+                async: "false",
+                data: {
+                    'item_id': item_id
+                },
+                error: function (e) {
+                    alert('Failed to get price!');
+                },
+                complete: function (data) {
+                    var obj = JSON.parse(data.responseText);
+                    $('input[name="itemPrice"]').val(obj.data);
+                }
+            });
+        });
+
+        function appendProduct() {
+            var index  = $('tbody tr').length + 1;
+            console.log(index);
+            var html = '<tr><td scope = "col">' + index + '</td><td>' + "2222" + '</td><td>' + "Otto" + '</td><td><input type="number" name="itemQty" value="1"></td><td>' + "Rp. 100.000" + '</td><td><a href="#" class="badge badge-danger"><i class="fas fa-trash"></i></a></td></tr>';
+            $('#tableProduct tbody').append(html);
+        }
+
 
         //step3
+
         $.ajax({
             url: "/Form/GetAllPaymentName",
             method: "POST",
@@ -379,6 +454,7 @@
             x = value - document.getElementById('price').value;//price ini id dari total pricenya nanti (blom bisa sekarang)
             document.getElementById('change').value = x;
         }
+
 
     </script>
 }
