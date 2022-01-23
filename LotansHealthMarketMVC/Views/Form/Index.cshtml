@@ -29,7 +29,7 @@
 
     <div class="tab-content">
         <!-- <form action=""> -->
-        <div id="step-1" class="tab-pane" role="tabpanel" style="min-height:500px">
+        <div id="step-1" class="tab-pane" role="tabpanel">
             <div class="form-group d-flex align-items-center justify-content-between">
 
                 <div class="d-flex align-items-center ">
@@ -76,10 +76,8 @@
                            value="Select" disabled>
                 </div>
             </div>
-
-
-
         </div>
+
         <div id="step-2" class="tab-pane" role="tabpanel">
             <label for="" class="font-weight-bold">Sales Summary</label>
             <div class="table-responsive">
@@ -94,24 +92,18 @@
                             <th scope="col">Action</th>
                         </tr>
                     </thead>
+
                     <tbody>
-                        @*<tr>
-            <td scope="row">1</td>
-            <td>2222</td>
-            <td>Otto</td>
-            <td><input type="number" name="" id="" value="1"></td>
-            <td>Rp. 100.000</td>
-            <td><a href="#" class="badge badge-danger"><i class="fas fa-trash"></i></a></td>
-        </tr>*@
+                        <tr id="noData">
+                            <td colspan="6" class="text-center"><i>Currently no data to view</i></td>
+                        </tr>
+                    </tbody>
                     <tfoot>
                         <tr>
                             <th colspan="3">Total</th>
-                            <td colspan="3">Rp. 100.000</td>
+                            <td total-price colspan="3">0</td>
                         </tr>
                     </tfoot>
-                        
-                    </tbody>
-                    
                 </table>
             </div>
 
@@ -163,8 +155,8 @@
             <h4>Payment Details</h4>
             <div class="d-flex align-items-center">
                 <p class="mr-5" for="">Total</p>
-                <p class="font-weight-bold">Rp. 100.000</p>
-                <input type="hidden" name="change" style="border:none; background:none; " id="price" value=100000>
+                <p payment-total class="font-weight-bold">0</p>
+                <input type="hidden" name="change" style="border:none; background:none; " id="price" value=0>
             </div>
             <div class="form-group ">
                 <label class=" control-label font-weight-bold" for="payment">Payment Method</label>
@@ -176,11 +168,11 @@
 
             <div class="form-group ">
                 <label class=" control-label font-weight-bold" for="paid">Amount Paid</label>
-                <input type="text" name="paid" onkeyup="change(this.value);" class="form-control">
+                <input type="text" name="paid" onkeyup="change(this.value);" onchange="change(this.value);" value="0" class="form-control">
             </div>
             <div class="form-group ">
-                <label class=" control-label font-weight-bold" for="paid">Change</label>
-                <input type="text" name="change" class="form-control" id="change" disabled>
+                <label class=" control-label font-weight-bold" for="change">Change</label>
+                <input type="text" class="form-control" id="change" disabled>
             </div>
             <button class="btn btn-info">Submit</button>
 
@@ -254,13 +246,13 @@
 @section Scripts {
     <script>
 
-        //$.fn.selectpicker.Constructor.BootstrapVersion = '4';
+            //$.fn.selectpicker.Constructor.BootstrapVersion = '4';
 
-        $(document).ready(function () {
-            GetAllCashierName();
-            GetItemCategory();
-            GetAllItemName();
-        });
+            $(document).ready(function () {
+                GetAllCashierName();
+                GetItemCategory();
+                GetAllItemName();
+            });
 
         function GetAllCashierName() {
             $.ajax({
@@ -282,7 +274,7 @@
                 }
             });
         }
-        
+
         function updateSupervisor(element) {
             var branch_id = $(element).val();
 
@@ -323,11 +315,11 @@
                 }
             });
         }
-       
+
 
         $("#buttonItem").click(function () {
             var item_id = $("#itemID").val();
- 
+
             $.ajax({
                 url: "/Form/GetItemDetail",
                 method: "POST",
@@ -367,7 +359,7 @@
                 }
             });
         }
-        
+
         function updateItemNameListByCategory(element) {
 
             var category_id = $(element).val();
@@ -396,7 +388,7 @@
                     $('select[name="itemName"]').val(obj.data[0].itemID).change();
 
                     $('select[name="itemName"]').selectpicker('refresh');
-                    
+
                 }
             });
         }
@@ -423,12 +415,92 @@
         });
 
         function appendProduct() {
-            var index  = $('tbody tr').length + 1;
-            console.log(index);
-            var html = '<tr><td scope = "col">' + index + '</td><td>' + "2222" + '</td><td>' + "Otto" + '</td><td><input type="number" name="itemQty" value="1"></td><td>' + "Rp. 100.000" + '</td><td><a href="#" class="badge badge-danger"><i class="fas fa-trash"></i></a></td></tr>';
-            $('#tableProduct tbody').append(html);
+            //clear error tag
+            var item_id = $('select[name="itemName"]').val();
+            var item_name = $('select[name="itemName"]').find(":selected").text();
+            var qty = $('input[name="qty"]').val();
+            var price = $('input[name="itemPrice"]').val();
+            var subtotal = qty * price;
+            if ($('input[name="itemPrice"]').hasClass('is-invalid')) {
+                $('input[name="itemPrice"]').removeClass('is-invalid');
+            }
+            if ($('select[name="itemName"]').hasClass('is-invalid')) {
+                $('select[name="itemName"]').removeClass('is-invalid');
+            }
+            if ($('input[name="qty"]').hasClass('is-invalid')) {
+                $('input[name="qty"]').removeClass('is-invalid');
+            }
+            //validate
+            if (price == '' || price == undefined) {
+                $('input[name="itemPrice"]').addClass('is-invalid');
+                return;
+            }
+            if (item_name == '' || item_name == undefined) {
+                $('select[name="itemName"]').addClass('is-invalid');
+                return;
+            }
+            if (qty == '' || qty == undefined) {
+                $('input[name="qty"]').addClass('is-invalid');
+                return;
+            }
+            //find duplicate
+            if ($('tbody tr[item-id="' + item_id + '"]').length) {
+                var row = $('tbody tr[item-id="' + item_id + '"]');
+                var qtyInput = row.find('input[name=itemQty]');
+                var finalQty = parseInt(qtyInput.val()) + parseInt(qty)
+                qtyInput.val(finalQty);
+                var thisRowSubtotal = row.find('td[sub-total]');
+                thisRowSubtotal.text(getIdr(parseInt(finalQty) * parseInt(price)));
+                updateTotalPrice(parseInt(qty) * parseInt(price));
+            }
+            else {
+                //no duplicate make new row
+                if ($('tbody #noData').length) {
+                    $('tbody #noData').remove();
+                }
+                var index = $('tbody tr').length + 1;
+                var html = '<tr item-id="' + item_id + '"><td scope = "col">' + index + '</td><td>' + item_id + '</td><td>' + item_name + '</td><td><input type="number" name="itemQty" value="' + qty + '"disabled></td><td sub-total>' + getIdr(subtotal) + '</td><td><button onclick="deleteThisRow(this)" class="btn btn-danger"><i class="fas fa-trash mr-2"></i>Delete</button></td></tr>';
+                $('#tableProduct tbody').append(html);
+                updateTotalPrice(subtotal);
+            }
         }
 
+        function updateTotalPrice(subtotal) {
+            var currentPrice = $('tfoot td[total-price]').text();
+            currentPrice = unformatIdr(currentPrice);
+            $('tfoot td[total-price]').text(getIdr(parseInt(currentPrice) + parseInt(subtotal)));
+            $('p[payment-total]').text(getIdr(parseInt(currentPrice) + parseInt(subtotal)));
+            $('input[name="change"]').val(parseInt(currentPrice) + parseInt(subtotal));
+            $('input[name="paid"]').val(0).change();
+        }
+
+        function updateTotalPriceDelete(deletedPrice) {
+            var currentPrice = $('tfoot td[total-price]').text();
+            currentPrice = unformatIdr(currentPrice);
+            $('tfoot td[total-price]').text(getIdr(parseInt(currentPrice) - parseInt(deletedPrice)));
+            $('p[payment-total]').text(getIdr(parseInt(currentPrice) + parseInt(subtotal)));
+            $('input[name="change"]').val(parseInt(currentPrice) + parseInt(subtotal));
+            $('input[name="paid"]').val(0).change();
+        }
+
+        function deleteThisRow(element) {
+            var thisRowSubTotal = $(element).closest('tr').find('td[sub-total]').text();
+            updateTotalPriceDelete(unformatIdr(thisRowSubTotal));
+            $(element).closest('tr').remove();
+            if ($('tbody tr').length == 0) {
+                var html = '<tr id="noData"><td colspan="6" class="text-center"><i>Currently no data to view</i></td></tr>'
+                $('#tableProduct tbody').append(html);
+            }
+        }
+
+        function getIdr(currency) {
+            var idr = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0, maximumFractionDigits: 0, }).format(currency);
+            return idr;
+        }
+
+        function unformatIdr(str) {
+            return str.replace('Rp', '').replace(/\u00a0/g, '').replaceAll('.', '');
+        }
 
         //step3
 
