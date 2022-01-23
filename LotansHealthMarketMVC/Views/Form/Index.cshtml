@@ -29,7 +29,7 @@
 
     <div class="tab-content">
         <!-- <form action=""> -->
-        <div id="step-1" class="tab-pane" role="tabpanel" style="min-height:500px">
+        <div id="step-1" class="tab-pane" role="tabpanel">
             <div class="form-group d-flex align-items-center justify-content-between">
 
                 <div class="d-flex align-items-center ">
@@ -73,7 +73,7 @@
                 <label class=" control-label font-weight-bold" for="supervisorName">Supervisor Name</label>
                 <div class="input-group mb-3">
                     <input type="text" name="supervisorName" class="form-control" placeholder="Supervisor's Name"
-                           value="Select" disabled>
+                           value="Bryan Susanto" disabled>
                 </div>
             </div>
         </div>
@@ -183,27 +183,23 @@
             <h2 class="text-center mb-3">Lotan's Health Market</h2>
             <div class="row">
                 <div class="col-3">Transaction ID</div>
-                <div class="col-3">: LT001</div>
+                <div summary-transaction-id class="col-3">: -</div>
 
                 <div class="col-3">Date</div>
-                <div class="col-3">: 14/01/2022</div>
+                <div summary-date class="col-3">: -</div>
             </div>
             <div class="row">
                 <div class="col-3">Cashier Name</div>
-                <div class="col-3">: Remigus Arjuna</div>
+                <div summary-cashier-name class="col-3">: -</div>
                 <div class="col-3">Branch Location</div>
-                <div class="col-3">: Alam Sutera</div>
+                <div summary-branch-location class="col-3">: -</div>
             </div>
             <hr class="border border-dark">
-            <div class="row">
-                <div class="col-1">1 </div>
-                <div class="col-8">HEVIT-C 1000mg 10s</div>
-                <div class="col-3">Rp. 13.600</div>
-            </div>
-            <div class="row">
-                <div class="col-1">1 </div>
-                <div class="col-8">Fitkom Gummy Calcium X16Gr</div>
-                <div class="col-3">Rp. 22.500</div>
+
+            <div class="product-list">
+                <div id="summary-no-data" class="row">
+                    <div class="col text-center"><i>Please submit your payment first</i></div>
+                </div>
             </div>
 
             <hr class="border border-dark">
@@ -212,28 +208,28 @@
                 <div class="col-6">
                 </div>
                 <div class="col-3">Total</div>
-                <div class="col-3"> Rp 36.000</div>
+                <div summary-total-price class="col-3"> Rp 36.000</div>
             </div>
 
             <div class="row">
                 <div class="col-6">
                 </div>
                 <div class="col-3">Payment</div>
-                <div class="col-3"> Cash</div>
+                <div summary-payment-name class="col-3"> Cash</div>
             </div>
 
             <div class="row">
                 <div class="col-6">
                 </div>
                 <div class="col-3">Amount Paid</div>
-                <div class="col-3"> Rp 40.000</div>
+                <div summary-amount-paid class="col-3"> Rp 40.000</div>
             </div>
-            
+
             <div class="row">
                 <div class="col-6">
                 </div>
                 <div class="col-3">Change</div>
-                <div class="col-3"> Rp. 3.900</div>
+                <div summary-change class="col-3"> Rp. 3.900</div>
             </div>
 
 
@@ -244,16 +240,74 @@
     </div>
 </div>
 
+<!-- Modal -->
+<div class="modal fade" id="successPayment" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="pb-5">
+                    <img src="./successPayment.png" width="300" height="250" alt="Success" />
+                </div>
+                <h2 class="font-weight-bold">Payment Success</h2>
+            </div>
+            <div class="modal-footer border-0 mx-auto pb-3">
+                 <a href="#step-4" class="btn btn-info" onclick="dismissModal()">See payment summary</a>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
 
-            //$.fn.selectpicker.Constructor.BootstrapVersion = '4';
+        //$.fn.selectpicker.Constructor.BootstrapVersion = '4';
 
-            $(document).ready(function () {
-                GetAllCashierName();
-                GetItemCategory();
-                GetAllItemName();
-            });
+        $(document).ready(function () {
+            GetTransactionID();
+            GetAllCashierName();
+            GetItemCategory();
+            GetAllItemName();
+            GetAllPaymentName();
+        });
+
+        function dismissModal() {
+            $('#successPayment').modal('hide');
+        }
+
+        function GetTransactionID() {
+            $.ajax({
+                url: "/Form/GetLastTransaction",
+                method: "POST",
+                dataType: "json",
+                error: function (data) {
+                    console.log(data.responseText);
+                    alert('Failed to retrieve transaction!');
+                },
+                complete: function (data) {
+                    console.log(data.responseText);
+                    var obj = JSON.parse(data.responseText);
+                    var length = Object.keys(obj.data).length;
+                    var lastTransNum = (obj.data[length - 1].transactionNum);
+                    var nowTransNum = lastTransNum + 1;
+                    if (nowTransNum < 10) {
+                        nowTransNum = "LT00" + nowTransNum;
+                    }
+                    else if (nowTransNum >= 10 && nowTransNum < 100) {
+                        nowTransNum = "LT0" + nowTransNum;
+                    }
+                    else {
+                        nowTransNum = "LT" + nowTransNum;
+                    }
+
+                    $('input[name="transID"]').val(nowTransNum).change();
+                }
+            })
+        }
 
         function GetAllCashierName() {
             $.ajax({
@@ -460,7 +514,7 @@
                     $('tbody #noData').remove();
                 }
                 var index = $('tbody tr').length + 1;
-                var html = '<tr item-id="' + item_id + '"><td scope = "col">' + index + '</td><td>' + item_id + '</td><td>' + item_name + '</td><td><input type="number" quantity name="itemQty" value="' + qty + '"disabled></td><td sub-total>' + getIdr(subtotal) + '</td><td><button onclick="deleteThisRow(this)" class="btn btn-danger"><i class="fas fa-trash mr-2"></i>Delete</button></td></tr>';
+                var html = '<tr item-id="' + item_id + '"><td scope = "col">' + index + '</td><td>' + item_id + '</td><td item-name>' + item_name + '</td><td><input type="number" quantity name="itemQty" value="' + qty + '"disabled></td><td sub-total>' + getIdr(subtotal) + '</td><td><button onclick="deleteThisRow(this)" class="btn btn-danger"><i class="fas fa-trash mr-2"></i>Delete</button></td></tr>';
                 $('#tableProduct tbody').append(html);
                 updateTotalPrice(subtotal);
             }
@@ -479,8 +533,8 @@
             var currentPrice = $('tfoot td[total-price]').text();
             currentPrice = unformatIdr(currentPrice);
             $('tfoot td[total-price]').text(getIdr(parseInt(currentPrice) - parseInt(deletedPrice)));
-            $('p[payment-total]').text(getIdr(parseInt(currentPrice) + parseInt(subtotal)));
-            $('input[name="change"]').val(parseInt(currentPrice) + parseInt(subtotal));
+            $('p[payment-total]').text(getIdr(parseInt(currentPrice) - parseInt(deletedPrice)));
+            $('input[name="change"]').val(parseInt(currentPrice) - parseInt(deletedPrice));
             $('input[name="paid"]').val(0).change();
         }
 
@@ -504,23 +558,24 @@
         }
 
         //step3
-
-        $.ajax({
-            url: "/Form/GetAllPaymentName",
-            method: "POST",
-            dataType: "json",
-            error: function (e) {
-                alert('Failed to retrieve payment name!');
-            },
-            complete: function (data) {
-                console.log(data.responseText);
-                var obj = JSON.parse(data.responseText);
-                var length = Object.keys(obj.data).length;
-                for (var i = 0; i < length; i++) {
-                    $('select[name="paymentName"]').append(new Option(obj.data[i].paymentName, obj.data[i].paymentID));
+        function GetAllPaymentName() {
+            $.ajax({
+                url: "/Form/GetAllPaymentName",
+                method: "POST",
+                dataType: "json",
+                error: function (e) {
+                    alert('Failed to retrieve payment name!');
+                },
+                complete: function (data) {
+                    console.log(data.responseText);
+                    var obj = JSON.parse(data.responseText);
+                    var length = Object.keys(obj.data).length;
+                    for (var i = 0; i < length; i++) {
+                        $('select[name="paymentName"]').append(new Option(obj.data[i].paymentName, obj.data[i].paymentID));
+                    }
                 }
-            }
-        });
+            });
+        }
 
         function change(value) {
             var x;
@@ -536,6 +591,10 @@
                 $('.amount-paid').text('The amount of money paid is not enough');
                 $('input[name="paid"]').addClass('is-invalid');
             }
+            else if ($('input[id="price"]').val() == 0 || $('input[id="price"]').val() == undefined) {
+                alert('You need to add some product first!');
+            }
+
             else {
                 //get all needed data
                 var listProduct = [];
@@ -549,11 +608,64 @@
                     listProduct.push(thisRowProductId);
                     listProductQty.push(thisRowProductQty);
                 });
+                //Fill Summary step with current data
+                fillSummary();
+
                 console.log(listProduct);
                 console.log(listProductQty);
                 console.log(paymentID);
                 console.log(cashierID);
             }
+        }
+        //Summary
+        function fillSummary() {
+            $('#summary-no-data').remove();
+            $('.product-list .row').each(function () {
+                $(this).remove();
+            })
+
+            var transactionID = $('input[name="transID"]').val();
+            var cashierName = $('select[name="cashierName"]').find(":selected").text();
+            var date = $('input[name="date"]').val();;
+            var branchLocation = $('select[name="branchloc"]').find(":selected").text();
+            var listProduct = [];
+            var listProductQty = [];
+            var listProductName = [];
+            var listProductSubtotal = [];
+
+            $('tbody tr[item-id]').each(function () {
+                var thisRowProductId = $(this).attr('item-id');
+                var thisRowProductQty = $(this).find('input[name="itemQty"]').val();
+                var thisRowProductName = $(this).find('td[item-name]').text();
+                var thisRowProductSubtotal = $(this).find('td[sub-total]').text();
+                listProduct.push(thisRowProductId);
+                listProductQty.push(thisRowProductQty);
+                listProductName.push(thisRowProductName);
+                listProductSubtotal.push(thisRowProductSubtotal);
+            });
+
+            var total = $('tfoot td[total-price]').text();
+            var paymentName = $('select[name="paymentName"]').find(":selected").text();
+            var amountPaid = $('input[name="paid"]').val();
+            var change = $('#change').val();
+            //change data on summary
+            $('[summary-transaction-id]').text(transactionID);
+            $('[summary-cashier-name]').text(cashierName);
+            $('[summary-date]').text(date);
+            $('[summary-branch-location]').text(branchLocation);
+
+            for (var i = 0; i < listProduct.length; i++) {
+                var row = '<div class="row"><div class="col-1">' + listProductQty[i] + '</div> <div class="col-8">' + listProductName[i] + '</div><div class="col-3">' + listProductSubtotal[i] + '</div></div>'
+                $('.product-list').append(row);
+            }
+
+            $('[summary-total-price]').text(total);
+            $('[summary-payment-name]').text(paymentName);
+            $('[summary-amount-paid]').text(getIdr(amountPaid));
+            $('[summary-change]').text(getIdr(change));
+
+            //trigger modal
+            $('#successPayment').modal('show');
         }
 
     </script>

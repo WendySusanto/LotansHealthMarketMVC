@@ -18,5 +18,7 @@ namespace LotansHealthMarketMVC.Models
         public DbSet<ItemModel> Item { get; set; }
         public DbSet<CategoryModel> Category { get; set; }
         public DbSet<PaymentModel> Payment { get; set; }
+        public DbSet<TransactionModel> Transaction { get; set; }
+        public DbSet<TransactionDetailModel> TransactionDetail { get; set; }
     }
 }

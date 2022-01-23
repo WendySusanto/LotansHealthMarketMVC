@@ -75,7 +75,12 @@ namespace LotansHealthMarketMVC.Controllers
         {
             return Json(new { data = await _cc.Payment.ToListAsync() });
         }
-        
+
+        public async Task<IActionResult> GetLastTransaction()
+        {
+            return Json(new { data = await _cc.Transaction.ToListAsync() });
+        }
+
         #endregion
     }
 }
