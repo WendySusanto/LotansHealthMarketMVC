@@ -208,33 +208,35 @@
                 <div class="col-6">
                 </div>
                 <div class="col-3">Total</div>
-                <div summary-total-price class="col-3"> Rp 36.000</div>
+                <div summary-total-price class="col-3">-</div>
             </div>
 
             <div class="row">
                 <div class="col-6">
                 </div>
                 <div class="col-3">Payment</div>
-                <div summary-payment-name class="col-3"> Cash</div>
+                <div summary-payment-name class="col-3">-</div>
             </div>
 
             <div class="row">
                 <div class="col-6">
                 </div>
                 <div class="col-3">Amount Paid</div>
-                <div summary-amount-paid class="col-3"> Rp 40.000</div>
+                <div summary-amount-paid class="col-3">-</div>
             </div>
 
             <div class="row">
                 <div class="col-6">
                 </div>
                 <div class="col-3">Change</div>
-                <div summary-change class="col-3"> Rp. 3.900</div>
+                <div summary-change class="col-3">-</div>
             </div>
 
-
-            <button class="btn btn-info" id="complete">Complete</button>
-
+            <div class="d-flex">
+                <button class="btn btn-info mr-3" id="complete" onclick="refresh()">Complete</button>
+                <button class="btn btn-info" onclick="exportToExcel()">Export to Excel</button>
+            </div>
+          
         </div>
         <!-- </form> -->
     </div>
@@ -274,6 +276,11 @@
             GetAllItemName();
             GetAllPaymentName();
         });
+
+        function refresh() {
+            location.href = '#step-1';
+            location.reload();
+        }
 
         function dismissModal() {
             $('#successPayment').modal('hide');
@@ -514,7 +521,7 @@
                     $('tbody #noData').remove();
                 }
                 var index = $('tbody tr').length + 1;
-                var html = '<tr item-id="' + item_id + '"><td scope = "col">' + index + '</td><td>' + item_id + '</td><td item-name>' + item_name + '</td><td><input type="number" quantity name="itemQty" value="' + qty + '"disabled></td><td sub-total>' + getIdr(subtotal) + '</td><td><button onclick="deleteThisRow(this)" class="btn btn-danger"><i class="fas fa-trash mr-2"></i>Delete</button></td></tr>';
+                var html = '<tr item-id="' + item_id + '"><td scope = "col">' + index + '</td><td>' + item_id + '</td><td item-name>' + item_name + '</td><td><input type="number" quantity name="itemQty" value="' + qty + '"disabled></td><td sub-total>' + getIdr(subtotal) + '</td><td><button style="white-space: nowrap" onclick="deleteThisRow(this)" class="btn btn-danger"><i class="fas fa-trash mr-2"></i>Delete</button></td></tr>';
                 $('#tableProduct tbody').append(html);
                 updateTotalPrice(subtotal);
             }
@@ -584,6 +591,7 @@
         }
 
         function addTransaction() {
+            //var transactionNum;
             //validate amount of paid
             $('.amount-paid').text('');
             $('input[name="paid"]').removeClass('is-invalid');
@@ -601,6 +609,7 @@
                 var listProductQty = [];
                 var paymentID = $('select[name="paymentName"]').val();
                 var cashierID = $('select[name="cashierName"]').val();
+                var transactionNum;
 
                 $('tbody tr[item-id]').each(function () {
                     var thisRowProductId = $(this).attr('item-id');
@@ -615,8 +624,51 @@
                 console.log(listProductQty);
                 console.log(paymentID);
                 console.log(cashierID);
+
+                $.ajax({
+                    url: "/Form/InsertTransaction",
+                    method: "POST",
+                    dataType: "json",
+                    data: {
+                        'CashierID': cashierID,
+                        'PaymentID': paymentID,
+                    },
+                    error: function (e) {
+                        alert('Failed to Insert Transaction Data !');
+                    },
+                    complete: function (data) {
+                        var obj = JSON.parse(data.responseText);
+                        var length = Object.keys(obj.data).length;
+                        var lastTransNum = (obj.data[length - 1].transactionNum);
+                        transactionNum = lastTransNum;
+                        InsertTransactionDetail(transactionNum, listProduct, listProductQty);
+                    }
+                });
             }
         }
+
+        function InsertTransactionDetail(transactionNum1, listProduct, listProductQty) {;
+            $.ajax({
+
+                url: "/Form/InsertTransactionDetail",
+                method: "GET",
+                dataType: "json",
+                traditional: true,
+                data: {
+                    'TransactionNum': transactionNum1,
+                    'ListItemID': listProduct,
+                    'ListItemQty': listProductQty,
+                },
+                error: function (e) {
+                    alert('Failed to Insert Transaction Detail Data!');
+                },
+                complete: function (data) {
+                    //alert('Transaction Detail Data Successfully Inserted!');
+                }
+            });
+        }
+
+
         //Summary
         function fillSummary() {
             $('#summary-no-data').remove();
@@ -666,6 +718,48 @@
 
             //trigger modal
             $('#successPayment').modal('show');
+        }
+
+        function exportToExcel() {
+            //test = $('[summary-transaction-id]').text(transactionID);
+
+            var listProductName = [];
+            var listProductSubtotal = [];
+            var listProductQty = [];
+
+            $('tbody tr[item-id]').each(function () {
+                var thisRowProductQty = $(this).find('input[name="itemQty"]').val();
+                var thisRowProductName = $(this).find('td[item-name]').text();
+                var thisRowProductSubtotal = $(this).find('td[sub-total]').text();
+                listProductQty.push(thisRowProductQty);
+                listProductName.push(thisRowProductName);
+                listProductSubtotal.push(thisRowProductSubtotal);
+            });
+
+            var test = $('[summary-transaction-id]').text();
+            var test2 = $('[summary-date]').text();
+            var test3 = $('[summary-cashier-name]').text();
+            var test4 = $('[summary-branch-location]').text();
+            var test5 = $('[summary-total-price]').text();
+
+
+            //(string transactionID, string itemCategory, string itemName, string itemPrice, string quantity, string subTotal,
+            //    string branchLocation, string date, string cashierName)
+
+
+            $.ajax({
+                url: "/Form/Excel",
+                method: "POST",
+                data: {
+                    "transactionID" : test
+                },
+                dataType: "json",
+                complete: function (data) {
+                    window.location = "/Form/Excel?transactionID=" + test + "&itemCategory=" + "Category" + "&itemName=" + listProductName[0] + "&itemPrice="
+                        + test5 + "&quantity=" + listProductQty[0] + "&subTotal=" + listProductSubtotal[0] + "&branchLocation=" + test4 + "&date=" + test2 + "&cashierName=" + test3;
+                }
+            });
+
         }
 
     </script>
