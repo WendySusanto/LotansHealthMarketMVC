@@ -42,7 +42,7 @@
                 <div class="d-flex align-items-center ">
                     <label class="mb-0 mr-3 control-label mr-2 font-weight-bold" for="date">Date</label>
                     <div class="">
-                        <input type="date" id="transDate" name="date" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" disabled>
+                        <input type="date" id="transDate" name="date" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")">
                     </div>
                 </div>
             </div>
@@ -121,8 +121,8 @@
             <div class="form-group ">
                 <label class=" control-label font-weight-bold" for="itemCat">Item Category</label>
                 <div class="">
-                    <select name="itemCat" class="form-control" onchange="updateItemNameListByCategory(this)" data-live-search="true">
-                        <option value="">-Filter by Category-</option>
+                    <select name="itemCat" class="form-control" onchange="updateItemNameListByCategory(this)" data-live-search="true" disabled>
+                        <option value="">-</option>
                     </select>
                 </div>
             </div>
@@ -131,7 +131,8 @@
             <div class="form-group ">
                 <label class=" control-label font-weight-bold" for="itemName">Item Name</label>
                 <div class="">
-                    <select name="itemName" class="form-control" data-live-search="true">
+                    <select name="itemName" class="form-control" data-live-search="true" disabled>
+                        <option value="">-</option> 
                         @*<option value="">Select Cashier's Name</option>*@
                     </select>
                 </div>
@@ -415,7 +416,8 @@
                     for (var i = 0; i < length; i++) {
                         $('select[name="itemName"]').append(new Option(obj.data[i].itemName, obj.data[i].itemID));
                     }
-                    $('select[name="itemName"]').val(obj.data[0].itemID).change();
+                    //aktifin kalo mau otomatis select data pertama
+                    //$('select[name="itemName"]').val(obj.data[0].itemID).change();
                     $('select[name="itemName"]').selectpicker();
 
                 }
@@ -423,36 +425,36 @@
         }
 
         function updateItemNameListByCategory(element) {
+            //aktifin kalo mau fitur filter by category
+            //var category_id = $(element).val();
+            ////alert(category_id);
 
-            var category_id = $(element).val();
-            //alert(category_id);
+            //$.ajax({
+            //    url: "/Form/GetAllItemName",
+            //    method: "POST",
+            //    dataType: "json",
+            //    async: false,
+            //    data: {
+            //        'category_id': category_id
+            //    },
+            //    error: function (e) {
+            //        alert('Failed to retrieve item name!');
+            //    },
+            //    complete: function (data) {
+            //        $('select[name="itemName"]').empty();
+            //        var obj = JSON.parse(data.responseText);
+            //        var length = Object.keys(obj.data).length;
+            //        for (var i = 0; i < length; i++) {
+            //            $('select[name="itemName"]').append(new Option(obj.data[i].itemName, obj.data[i].itemID));
+            //        }
+            //        $('select[name="itemName"]').selectpicker('refresh');
 
-            $.ajax({
-                url: "/Form/GetAllItemName",
-                method: "POST",
-                dataType: "json",
-                async: false,
-                data: {
-                    'category_id': category_id
-                },
-                error: function (e) {
-                    alert('Failed to retrieve item name!');
-                },
-                complete: function (data) {
-                    $('select[name="itemName"]').empty();
-                    var obj = JSON.parse(data.responseText);
-                    var length = Object.keys(obj.data).length;
-                    for (var i = 0; i < length; i++) {
-                        $('select[name="itemName"]').append(new Option(obj.data[i].itemName, obj.data[i].itemID));
-                    }
-                    $('select[name="itemName"]').selectpicker('refresh');
+            //        $('select[name="itemName"]').val(obj.data[0].itemID).change();
 
-                    $('select[name="itemName"]').val(obj.data[0].itemID).change();
+            //        $('select[name="itemName"]').selectpicker('refresh');
 
-                    $('select[name="itemName"]').selectpicker('refresh');
-
-                }
-            });
+            //    }
+            //});
         }
 
         $('select[name="itemName"]').change(function () {
@@ -478,6 +480,7 @@
 
         function appendProduct() {
             //clear error tag
+            var item_id_input = $('input[name="itemID"]').val();
             var item_id = $('select[name="itemName"]').val();
             var item_name = $('select[name="itemName"]').find(":selected").text();
             var qty = $('input[name="qty"]').val();
@@ -486,6 +489,9 @@
             if ($('input[name="itemPrice"]').hasClass('is-invalid')) {
                 $('input[name="itemPrice"]').removeClass('is-invalid');
             }
+            if ($('input[name="itemID"]').hasClass('is-invalid')) {
+                $('input[name="itemID"]').removeClass('is-invalid');
+            }
             if ($('select[name="itemName"]').hasClass('is-invalid')) {
                 $('select[name="itemName"]').removeClass('is-invalid');
             }
@@ -493,27 +499,36 @@
                 $('input[name="qty"]').removeClass('is-invalid');
             }
             //validate
+            var isValid = true;
+            if (item_id_input == '' || item_id_input == undefined) {
+                $('input[name="itemID"]').addClass('is-invalid');
+                isValid = false;
+            }
             if (price == '' || price == undefined) {
                 $('input[name="itemPrice"]').addClass('is-invalid');
-                return;
+                isValid = false;
             }
             if (item_name == '' || item_name == undefined) {
                 $('select[name="itemName"]').addClass('is-invalid');
-                return;
+                isValid = false;
             }
             if (qty == '' || qty == undefined) {
                 $('input[name="qty"]').addClass('is-invalid');
-                return;
+                isValid = false;
             }
+            if (isValid == false) return;
             //find duplicate
             if ($('tbody tr[item-id="' + item_id + '"]').length) {
                 var row = $('tbody tr[item-id="' + item_id + '"]');
                 var qtyInput = row.find('input[name=itemQty]');
-                var finalQty = parseInt(qtyInput.val()) + parseInt(qty)
-                qtyInput.val(finalQty);
-                var thisRowSubtotal = row.find('td[sub-total]');
-                thisRowSubtotal.text(getIdr(parseInt(finalQty) * parseInt(price)));
-                updateTotalPrice(parseInt(qty) * parseInt(price));
+                if (qtyInput.val() != '' && qtyInput.val() != undefined) {
+                    alert(qtyInput.val());
+                    var finalQty = parseInt(qtyInput.val()) + parseInt(qty)
+                    qtyInput.val(finalQty);
+                    var thisRowSubtotal = row.find('td[sub-total]');
+                    thisRowSubtotal.text(getIdr(parseInt(finalQty) * parseInt(price)));
+                    updateTotalPrice(parseInt(qty) * parseInt(price));
+                }  
             }
             else {
                 //no duplicate make new row
@@ -521,22 +536,44 @@
                     $('tbody #noData').remove();
                 }
                 var index = $('tbody tr').length + 1;
-                var html = '<tr item-id="' + item_id + '"><td scope = "col">' + index + '</td><td>' + item_id + '</td><td item-name>' + item_name + '</td><td><input type="number" quantity name="itemQty" value="' + qty + '"disabled></td><td sub-total>' + getIdr(subtotal) + '</td><td><button style="white-space: nowrap" onclick="deleteThisRow(this)" class="btn btn-danger"><i class="fas fa-trash mr-2"></i>Delete</button></td></tr>';
+                var html = '<tr item-id="' + item_id + '"><td scope = "col">' + index + '</td><td price="' + price + '">' + item_id + '</td><td item-name>' + item_name + '</td><td><input type="number" min="1" quantity name="itemQty" onkeyup="updateSubTotal(this)" value="' + qty + '"></td><td sub-total>' + getIdr(subtotal) + '</td><td><button style="white-space: nowrap" onclick="deleteThisRow(this)" class="btn btn-danger"><i class="fas fa-trash mr-2"></i>Delete</button></td></tr>';
                 $('#tableProduct tbody').append(html);
                 updateTotalPrice(subtotal);
             }
         }
 
+        function updateSubTotal(element) {
+
+            var row = $(element).closest('tr[item-id]');
+            var qty = row.find('input[name="itemQty"]').val();
+            var price = row.find('td[price]').attr('price');
+            var subtotal = row.find('td[sub-total]');
+            var oldSubtotal = subtotal.text();
+            if (isNaN(parseInt(price) * parseInt(qty)) == false) {
+                subtotal.text(getIdr(parseInt(price) * parseInt(qty)));
+                console.log("old subtotal " + oldSubtotal);
+                console.log("new subtotal " + subtotal.text());
+                updateTotalPriceDelete(unformatIdr(oldSubtotal));
+                updateTotalPrice(unformatIdr(subtotal.text()));
+            }
+
+        }
+
+
         function updateTotalPrice(subtotal) {
-            var currentPrice = $('tfoot td[total-price]').text();
-            currentPrice = unformatIdr(currentPrice);
-            $('tfoot td[total-price]').text(getIdr(parseInt(currentPrice) + parseInt(subtotal)));
-            $('p[payment-total]').text(getIdr(parseInt(currentPrice) + parseInt(subtotal)));
-            $('input[name="change"]').val(parseInt(currentPrice) + parseInt(subtotal));
-            $('input[name="paid"]').val(0).change();
+            if (isNaN(subtotal) == false) {
+                var currentPrice = $('tfoot td[total-price]').text();
+                currentPrice = unformatIdr(currentPrice);
+                $('tfoot td[total-price]').text(getIdr(parseInt(currentPrice) + parseInt(subtotal)));
+                $('p[payment-total]').text(getIdr(parseInt(currentPrice) + parseInt(subtotal)));
+                $('input[name="change"]').val(parseInt(currentPrice) + parseInt(subtotal));
+                $('input[name="paid"]').val(0).change();
+            }
+
         }
 
         function updateTotalPriceDelete(deletedPrice) {
+
             var currentPrice = $('tfoot td[total-price]').text();
             currentPrice = unformatIdr(currentPrice);
             $('tfoot td[total-price]').text(getIdr(parseInt(currentPrice) - parseInt(deletedPrice)));
@@ -647,7 +684,8 @@
             }
         }
 
-        function InsertTransactionDetail(transactionNum1, listProduct, listProductQty) {;
+        function InsertTransactionDetail(transactionNum1, listProduct, listProductQty) {
+            ;
             $.ajax({
 
                 url: "/Form/InsertTransactionDetail",
@@ -751,7 +789,7 @@
                 url: "/Form/Excel",
                 method: "POST",
                 data: {
-                    "transactionID" : test
+                    "transactionID": test
                 },
                 dataType: "json",
                 complete: function (data) {
