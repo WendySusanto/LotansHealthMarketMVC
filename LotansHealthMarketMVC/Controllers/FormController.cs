@@ -11,6 +11,7 @@ using ClosedXML.Excel;
 using System.IO;
 using System.Diagnostics;
 using System.Web;
+using OfficeOpenXml;
 
 namespace LotansHealthMarketMVC.Controllers
 {
@@ -18,6 +19,7 @@ namespace LotansHealthMarketMVC.Controllers
     {
 
         private readonly ConnectionString _cc;
+        db dbop = new db();
 
         public FormController(ConnectionString cc)
         {
@@ -35,6 +37,22 @@ namespace LotansHealthMarketMVC.Controllers
             var result = _cc.Branch.ToList();
 
             return View(result);
+        }
+
+        public IActionResult ExporttoExcel()
+        {
+            DataSet ds = dbop.GetRecord();
+            var stream = new MemoryStream();
+
+            using (var package = new ExcelPackage(stream))
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                worksheet.Cells.LoadFromDataTable(ds.Tables[0], true);
+                package.Save();
+            }
+            stream.Position = 0;
+            string excelname = $"Transaction List - {DateTime.Now.ToString("yyyyMMdd")}.xlsx";
+            return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelname);
         }
 
         #region API Calls
@@ -74,7 +92,7 @@ namespace LotansHealthMarketMVC.Controllers
 
         public async Task<IActionResult> GetItemPrice(String item_id)
         {
-            return Json(new { data = await (from x in _cc.Item where x.ItemID == item_id select x.ItemPrice ).FirstAsync() });
+            return Json(new { data = await (from x in _cc.Item where x.ItemID == item_id select x ).FirstAsync() });
         }
 
         public async Task<IActionResult> GetAllPaymentName()
@@ -123,52 +141,6 @@ namespace LotansHealthMarketMVC.Controllers
 
             return Json(new { data = await _cc.Transaction.ToListAsync() });
         }
-
-        public IActionResult Excel(string transactionID, string itemCategory, string itemName, string itemPrice, string quantity, string subTotal, string branchLocation, string date, string cashierName)
-        {
-
-            using (var workbook = new XLWorkbook())
-            {
-                var worksheet = workbook.Worksheets.Add("Transaction");
-                var currentRow = 1;
-                worksheet.Cell(currentRow, 1).Value = "Transaction ID";
-                worksheet.Cell(currentRow, 2).Value = "No";
-                worksheet.Cell(currentRow, 3).Value = "Item Category";
-                worksheet.Cell(currentRow, 4).Value = "Item Name";
-                worksheet.Cell(currentRow, 5).Value = "Item Price";
-                worksheet.Cell(currentRow, 6).Value = "Quantity";
-                worksheet.Cell(currentRow, 7).Value = "Sub Total";
-                worksheet.Cell(currentRow, 8).Value = "Branch Location";
-                worksheet.Cell(currentRow, 9).Value = "Date";
-                worksheet.Cell(currentRow, 10).Value = "Cashier Name";
-
-                //logic masukkin data
-                currentRow = 2;
-                worksheet.Cell(currentRow, 1).Value = transactionID;
-                worksheet.Cell(currentRow, 2).Value = "1";
-                worksheet.Cell(currentRow, 3).Value = itemCategory;
-                worksheet.Cell(currentRow, 4).Value = itemName;
-                worksheet.Cell(currentRow, 5).Value = itemPrice;
-                worksheet.Cell(currentRow, 6).Value = quantity;
-                worksheet.Cell(currentRow, 7).Value = subTotal;
-                worksheet.Cell(currentRow, 8).Value = branchLocation;
-                worksheet.Cell(currentRow, 9).Value = date;
-                worksheet.Cell(currentRow, 10).Value = cashierName;
-
-
-                using (var stream = new MemoryStream())
-                {
-                    workbook.SaveAs(stream);
-                    var content = stream.ToArray();
-                    return File(content,
-                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "TransactionForm.xlsx");
-                }
-            }
-
-
-        }
-
-
 
         #endregion
     }
